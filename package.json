@@ -1,0 +1,29 @@
+{
+  "name": "martin-brevard-house",
+  "version": "0.1.0",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "seed": "node server/seed.js",
+    "start": "node server/server.js",
+    "build": "npm run build --prefix web",
+    "dev": "npm run build --prefix web && node server/server.js",
+    "backup": "sh scripts/backup.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajmartin94/BrevardHouse.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ajmartin94/BrevardHouse/issues"
+  },
+  "homepage": "https://github.com/ajmartin94/BrevardHouse#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "multer": "^2.2.0"
+  },
+  "private": true
+}
