@@ -1,4 +1,5 @@
 const crypto = require('node:crypto');
+const nodemailer = require('nodemailer');
 const { get, all, run } = require('./db');
 
 // ---------- passwords & tokens ----------
@@ -30,12 +31,30 @@ function sessionUser(t) {
 }
 function destroySession(t) { if (t) run('DELETE FROM sessions WHERE token = ?', t); }
 
-// ---------- mail (dev transport: outbox table + console) ----------
-// NTF-1/NTF-2. In production, point sendMail at real SMTP; in dev every email
-// lands in the outbox (viewable in Admin) and the server log.
+// ---------- mail (SMTP if configured, else dev outbox + console) ----------
+// NTF-1/NTF-2. Every email is always recorded in the outbox (viewable in Admin)
+// and logged to the console. If SMTP_USER/SMTP_PASS are set (see .env.example),
+// it's also actually sent via SMTP.
+let mailTransport = null;
+if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+  mailTransport = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: Number(process.env.SMTP_PORT) || 465,
+    secure: Number(process.env.SMTP_PORT || 465) === 465,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+}
 function sendMail(toEmail, subject, body) {
   run('INSERT INTO outbox (to_email, subject, body) VALUES (?, ?, ?)', toEmail, subject, body);
   console.log(`[mail → ${toEmail}] ${subject}\n${body}\n`);
+  if (mailTransport) {
+    mailTransport.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: toEmail,
+      subject,
+      text: body,
+    }).catch((err) => console.error(`[mail → ${toEmail}] send failed:`, err.message));
+  }
 }
 
 // ---------- notifications / events / audit ----------

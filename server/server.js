@@ -1,3 +1,4 @@
+require('dotenv').config({ quiet: true });
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('node:path');

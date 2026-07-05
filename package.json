@@ -22,8 +22,10 @@
   "homepage": "https://github.com/ajmartin94/BrevardHouse#readme",
   "dependencies": {
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3"
   },
   "private": true
 }
