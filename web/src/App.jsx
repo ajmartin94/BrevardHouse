@@ -11,6 +11,7 @@ import Emergency from './pages/Emergency.jsx';
 import Things from './pages/Things.jsx';
 import Gallery from './pages/Gallery.jsx';
 import Account from './pages/Account.jsx';
+import Help from './pages/Help.jsx';
 import Login from './pages/Login.jsx';
 import Guest from './pages/Guest.jsx';
 
@@ -29,6 +30,7 @@ const MORE = [
   { path: '/things', label: 'Things To Do' },
   { path: '/gallery', label: 'Photo Gallery' },
   { path: '/account', label: 'Account' },
+  { path: '/help', label: 'Help' },
 ];
 
 export default function App() {
@@ -95,6 +97,7 @@ export default function App() {
             <Route path="/things" element={<Things />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/help" element={<Help />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

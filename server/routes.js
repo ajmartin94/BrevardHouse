@@ -665,6 +665,17 @@ router.post('/notifications/read', requireAuth, (req, res) => {
 });
 
 // =====================================================================
+// HELP / FEEDBACK
+// =====================================================================
+router.post('/feedback', requireAuth, (req, res) => {
+  const text = String(req.body?.text || '').trim();
+  if (!text) return res.status(400).json({ error: 'Say what you would like to share' });
+  L.notifyAdmins(`${req.user.name} sent feedback: "${text.length > 80 ? text.slice(0, 77) + '…' : text}"`, '/help', req.user.id);
+  L.audit(req.user.id, 'create', 'feedback', null, text.slice(0, 120));
+  res.json({ ok: true });
+});
+
+// =====================================================================
 // ADMIN (ADM-1..5) + guest links (AUTH-4)
 // =====================================================================
 router.get('/admin/pending', requireAdmin, (req, res) => {
