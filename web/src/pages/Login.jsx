@@ -17,9 +17,8 @@ export default function Login({ onLogin }) {
         await api('/auth/login', { body: { email: form.email, password: form.password } });
         onLogin();
       } else if (mode === 'register') {
-        const d = await api('/auth/register', { body: form });
-        setMessage(d.message);
-        setMode('login');
+        await api('/auth/register', { body: form });
+        onLogin();
       } else {
         const d = await api('/auth/magic-request', { body: { email: form.email } });
         setMessage(d.message + ' (Dev build: the link is in the admin Outbox / server log.)');
@@ -48,13 +47,13 @@ export default function Login({ onLogin }) {
           {error && <div className="error" role="alert">{error}</div>}
           {message && <div className="notice">{message}</div>}
           <button className="btn btn-primary btn-block mt" disabled={busy}>
-            {mode === 'login' ? 'Log in' : mode === 'register' ? 'Request an account' : 'Email me a sign-in link'}
+            {mode === 'login' ? 'Log in' : mode === 'register' ? 'Create account' : 'Email me a sign-in link'}
           </button>
         </form>
         <div className="center">
           {mode !== 'login' && <button className="btn-link" onClick={() => setMode('login')}>Back to log in</button>}
           {mode === 'login' && <>
-            <button className="btn-link" onClick={() => setMode('register')}>New here? Request an account</button>
+            <button className="btn-link" onClick={() => setMode('register')}>New here? Create an account</button>
             <br />
             <button className="btn-link" onClick={() => setMode('magic')}>Forgot password? Get a sign-in link</button>
           </>}

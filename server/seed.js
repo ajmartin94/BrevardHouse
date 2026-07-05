@@ -27,7 +27,7 @@ addUser('Claire Martin', 'claire@example.com', 'member');
 addUser('Ben Okafor', 'ben@example.com', 'member');
 addUser('Priya Nair', 'priya@example.com', 'member');
 addUser('Marcus Boone', 'marcus@example.com', 'member');
-addUser('Tom Rivera', 'tom@example.com', 'member', 0); // pending account approval (ADM-5 demo)
+addUser('Tom Rivera', 'tom@example.com', 'member');
 
 // ---------- stays ----------
 function addStay(proposer, start, end, party, who, notes, status) {
@@ -193,7 +193,6 @@ console.log('Seed complete.');
 console.log('');
 console.log('  Logins (all passwords: %s)', PASSWORD);
 console.log('    admin:  martin.andrew.94@gmail.com  (Andrew Martin)');
-console.log('    member: claire@example.com, ben@example.com, priya@example.com, marcus@example.com');
-console.log('    pending account demo: tom@example.com (approve in Account → Admin)');
+console.log('    member: claire@example.com, ben@example.com, priya@example.com, marcus@example.com, tom@example.com');
 console.log('');
 console.log('  Guest guide link: /guest/' + guestToken);

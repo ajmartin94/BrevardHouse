@@ -99,11 +99,13 @@ router.post('/auth/register', (req, res) => {
   if (!name || !email || !password) return res.status(400).json({ error: 'Name, email and password are required' });
   if (String(password).length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
   if (get('SELECT id FROM users WHERE email = ?', email)) return res.status(400).json({ error: 'That email is already registered' });
-  const r = run('INSERT INTO users (name, email, password_hash, role, active) VALUES (?, ?, ?, ?, 0)',
+  const r = run('INSERT INTO users (name, email, password_hash, role, active) VALUES (?, ?, ?, ?, 1)',
     String(name).trim(), String(email).trim(), L.hashPassword(password), 'member');
-  L.notifyAdmins(`${name} requested an account — approve or decline in Account.`, '/account');
-  L.audit(Number(r.lastInsertRowid), 'register', 'user', Number(r.lastInsertRowid));
-  res.json({ ok: true, message: 'Account requested. An admin will approve it — you will get an email.' });
+  const id = Number(r.lastInsertRowid);
+  L.audit(id, 'register', 'user', id);
+  const t = L.createSession(id);
+  res.cookie('session', t, { httpOnly: true, sameSite: 'lax', maxAge: 365 * 24 * 3600 * 1000 });
+  res.json({ user: publicUser(get('SELECT * FROM users WHERE id = ?', id)) });
 });
 
 router.post('/auth/login', (req, res) => {
@@ -179,8 +181,7 @@ router.get('/dashboard', requireAuth, (req, res) => {
   if (isAdmin(req)) {
     pendingCount =
       get(`SELECT COUNT(*) AS n FROM suggestions WHERE status = 'pending'`).n +
-      get(`SELECT COUNT(*) AS n FROM stays WHERE status = 'pending'`).n +
-      get('SELECT COUNT(*) AS n FROM users WHERE active = 0').n;
+      get(`SELECT COUNT(*) AS n FROM stays WHERE status = 'pending'`).n;
   }
   res.json({
     currentStay: stayView(current),
@@ -670,7 +671,6 @@ router.get('/admin/pending', requireAdmin, (req, res) => {
   res.json({
     suggestions: all(`SELECT * FROM suggestions WHERE status = 'pending' ORDER BY created_at`).map(suggestionView),
     stays: all(`SELECT * FROM stays WHERE status = 'pending' ORDER BY start_date`).map(stayView),
-    accounts: all('SELECT id, name, email, created_at FROM users WHERE active = 0'),
   });
 });
 router.get('/admin/users', requireAdmin, (req, res) => {
@@ -682,18 +682,6 @@ router.post('/admin/users/:id/approve', requireAdmin, (req, res) => {
   run('UPDATE users SET active = 1 WHERE id = ?', u.id);
   L.sendMail(u.email, 'Your Martin Brevard House account is approved', `Hi ${u.name},\n\nYou're in — log in and plan a stay.\n\n— Martin Brevard House`);
   L.audit(req.user.id, 'approve', 'user', u.id);
-  res.json({ ok: true });
-});
-// ADM-3/ADM-5: pending registrations can be declined, with reason + email to the requester
-router.post('/admin/users/:id/decline', requireAdmin, (req, res) => {
-  const u = get('SELECT * FROM users WHERE id = ? AND active = 0', req.params.id);
-  if (!u) return res.status(404).json({ error: 'No pending account with that id' });
-  const reason = String(req.body?.reason || '');
-  L.audit(req.user.id, 'decline', 'user', u.id, `${u.email}${reason ? ' — ' + reason : ''}`);
-  L.sendMail(u.email, 'Martin Brevard House — account request declined',
-    `Hi ${u.name},\n\nYour account request was declined${reason ? ': ' + reason : '.'}\n\nIf you think this is a mistake, reply to the family admin.\n\n— Martin Brevard House`);
-  run('DELETE FROM sessions WHERE user_id = ?', u.id);
-  run('DELETE FROM users WHERE id = ?', u.id);
   res.json({ ok: true });
 });
 router.post('/admin/users/:id/role', requireAdmin, (req, res) => {

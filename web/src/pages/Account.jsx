@@ -112,27 +112,13 @@ function AdminPanel({ refreshMe }) {
   }
 
   if (!pending) return <div className="spin">Loading admin…</div>;
-  const total = pending.suggestions.length + pending.stays.length + pending.accounts.length;
+  const total = pending.suggestions.length + pending.stays.length;
 
   return (
     <div>
       <div className="kicker">Pending approvals ({total})</div>
       {error && <div className="error">{error}</div>}
       {total === 0 && <p className="muted">Nothing waiting — all caught up.</p>}
-
-      {pending.accounts.map(a => (
-        <div className="card card-amber" key={'acct' + a.id}>
-          <b style={{ fontSize: 13 }}>Account request</b>
-          <div style={{ fontSize: 13, marginTop: 2 }}>{a.name} · {a.email}</div>
-          <div className="row mt">
-            <button className="btn btn-approve btn-sm" onClick={() => act(`/admin/users/${a.id}/approve`)}>Approve</button>
-            <button className="btn btn-sm" onClick={() => {
-              const reason = prompt(`Optional: why decline? (emailed to ${a.name})`);
-              if (reason !== null) act(`/admin/users/${a.id}/decline`, { reason });
-            }}>Decline…</button>
-          </div>
-        </div>
-      ))}
 
       {pending.stays.map(s => (
         <div className="card card-amber" key={'stay' + s.id}>
