@@ -6,6 +6,7 @@
   },
   "scripts": {
     "seed": "node server/seed.js",
+    "create-admin": "node server/create-admin.js",
     "start": "node server/server.js",
     "build": "npm run build --prefix web",
     "dev": "npm run build --prefix web && node server/server.js",
