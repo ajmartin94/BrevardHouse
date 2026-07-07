@@ -17,21 +17,22 @@ Then open the printed `network:` URL on any device on the same wifi (e.g. `http:
 
 **Seeded logins** (all passwords `brevard2026`):
 - Admin — `martin.andrew.94@gmail.com` (Andrew Martin)
-- Members — `claire@example.com`, `ben@example.com`, `priya@example.com`, `marcus@example.com`
-- Pending-account demo — `tom@example.com` (approve it in Account)
+- Members — `claire@example.com`, `ben@example.com`, `priya@example.com`, `marcus@example.com`, `tom@example.com`
 
 The seed also prints a **guest guide link** (`/guest/<token>`) — read-only house guide, no login.
 
+`npm run seed` is dev-only — it wipes and rebuilds the DB with fake demo data. Never run it in production. See `docs/deployment.md` for how the first production admin account gets created instead.
+
 ## Layout
 
-- `server/` — Express API (`routes.js`), schema (`db.js`), seed (`seed.js`); DB + uploads live in `server/data/` (gitignored)
+- `server/` — Express API (`routes.js`), schema (`db.js`), seed (`seed.js`), admin bootstrap (`create-admin.js`); DB + uploads live in `server/data/` (gitignored)
 - `web/` — React SPA; `npm run build --prefix web` outputs `web/dist`, which the server serves
 - `scripts/backup.sh` — nightly DB + uploads backup (NFR-4); schedule with cron/launchd
-- `docs/` — requirements (`user-requirements.md`), UX audit, improvement research, archived prototype
+- `docs/` — requirements (`user-requirements.md`), UX audit, improvement research, [deployment guide](docs/deployment.md), archived prototype
 
 ## Dev notes / known dev-mode limits
 
-- **Email (NTF-1/2)** uses a dev transport: every message is stored in an outbox (Account → “Email outbox (dev)”) and logged to the server console. Point `lib.js#sendMail` at real SMTP for production.
+- **Email (NTF-1/2)**: every message is always recorded in an outbox (Account → "Email outbox (dev)") and logged to the server console. If `SMTP_USER`/`SMTP_PASS` are set in `.env` (see `.env.example`), it's also actually sent via SMTP — same code path in dev and production.
 - **Service worker / offline (GEN-1)** requires a secure context. It fully works on `http://localhost:4545`; on plain-HTTP LAN IPs browsers skip SW registration, so offline caching won't engage on phones until the app is served over HTTPS (fine for this testing round — the VPS deploy will have TLS).
 - **Image derivatives (NFR-3)**: thumbnails are generated client-side at upload (max 480px JPEG) and served for all grids; originals are kept and served in the lightbox. If photo volume outgrows the VPS disk, the documented growth path is object storage or an Immich sidecar with deep-linked trip albums (see `docs/improvement-research.md` §B6).
 - Iterating on the frontend? `npx vite` in `web/` gives hot reload with `/api` proxied to :4545.

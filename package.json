@@ -6,6 +6,7 @@
   },
   "scripts": {
     "seed": "node server/seed.js",
+    "create-admin": "node server/create-admin.js",
     "start": "node server/server.js",
     "build": "npm run build --prefix web",
     "dev": "npm run build --prefix web && node server/server.js",
@@ -22,8 +23,10 @@
   "homepage": "https://github.com/ajmartin94/BrevardHouse#readme",
   "dependencies": {
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3"
   },
   "private": true
 }
